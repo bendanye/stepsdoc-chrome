@@ -1,0 +1,26 @@
+{
+    "manifest_version": 2,
+    "name": "StepDocs",
+    "description": "A chrome extension to record your actions into a document",
+    "version": "0.1",
+    "background": {
+      "scripts": ["background.js"],
+      "persistent": false
+    },
+    "content_scripts": [
+      {
+        "matches": [
+          "<all_urls>"
+        ],
+        "js": ["jquery-3.5.1.min.js", "content.js"]
+      }
+    ],
+    "browser_action": {
+      "default_icon": "icon-black.png",
+      "default_title": "StepDocs"
+    },
+	"permissions": [
+	  "storage",
+	  "tabs"
+	]
+  }
