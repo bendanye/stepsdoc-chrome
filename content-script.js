@@ -14,8 +14,8 @@
   }
       
   function handleKeydown(e) {
-    console.log("handleKeydown-" + e);
-    if (e.keyCode !== 9 || e.keyCode !== 13) {
+    console.log("handleKeydown-" + e.keyCode);
+    if (e.keyCode !== 9 && e.keyCode !== 13) {
       return
     }
     sendMessage(e);
