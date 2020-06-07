@@ -96,7 +96,7 @@ function generateRecordingOutput(recording) {
 }
 
 function handleCompletedNavigation (details) {
-    alert("handleCompletedNavigation");
+    //alert("handleCompletedNavigation");
     if (details.frameId === 0) {
         chrome.tabs.executeScript({ file: 'content-script.js' })
     }
