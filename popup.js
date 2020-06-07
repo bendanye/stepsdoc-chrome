@@ -76,15 +76,16 @@ function generateRecordingOutput(recording) {
         let action = recording[i].action;
         let selector = recording[i].selector;
         let url = recording[i].url;
+        output += 'Step ' + (parseInt(i)+1) + ': '
         switch (action) {
             case 'keydown':
-                output += `.type('${selector}', '${value}')`
+                output += `type on '${selector}', '${value}'`
                 break
             case 'click':
-                output += `.click('${selector}')`
+                output += `click on '${selector}'`
                 break
             case 'goto':
-                output += `.goto('${url}')`
+                output += `.go to '${url}'`
                 break
         }
         output += "\n\n";
@@ -95,7 +96,7 @@ function generateRecordingOutput(recording) {
 }
 
 function handleCompletedNavigation (details) {
-    console.log("handleCompletedNavigation");
+    alert("handleCompletedNavigation");
     if (details.frameId === 0) {
         chrome.tabs.executeScript({ file: 'content-script.js' })
     }
