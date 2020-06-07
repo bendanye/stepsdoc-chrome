@@ -87,7 +87,7 @@ function generateRecordingOutput(recording) {
                 output += `.goto('${url}')`
                 break
         }
-        output += "\n";
+        output += "\n\n";
     }
 
     return output;
