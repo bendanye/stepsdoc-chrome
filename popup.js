@@ -5,12 +5,15 @@ $(function(){
     chrome.storage.sync.get(['recordingState'],function(recorder){
         let recordingState = recorder.recordingState;
 
-        if (recordingState) {
-            $('#recordBtn').prop('value', 'Stop Recording');
-        }
-
-        else {
-            $('#recordBtn').prop('value', 'Start Recording');
+        switch (recordingState) {
+            case 'RECORDING':
+                $('#recordBtn').prop('value', 'Stop Recording');
+                break;
+            case 'FINISH':
+                $('#recordBtn').prop('value', 'Clear Recording');
+                break;
+            default:
+                $('#recordBtn').prop('value', 'Start Recording');
         }
     });
 
@@ -18,11 +21,12 @@ $(function(){
 
         chrome.storage.sync.get(['recording', 'recordingState'],function(recorder){
 
-            var recordingState = recorder.recordingState;
-            var recording = recorder.recording;
+            let recordingState = recorder.recordingState;
+            let recording = recorder.recording;
         
-            if (recordingState) {
-                $('#recordBtn').prop('value', 'Start Recording');
+            if (recordingState === 'RECORDING') {
+                $('#recordBtn').prop('value', 'Clear Recording');
+                recordingState = 'FINISH';
 
                 let output = "";
                 
@@ -37,9 +41,18 @@ $(function(){
                 chrome.runtime.onMessage.removeListener()
                 chrome.tabs.onUpdated.removeListener()
             }
+
+            else if (recordingState === 'FINISH') {
+                recording = [];
+                $('#output').val('');
+                recordingState = 'BEGIN';
+                $('#recordBtn').prop('value', 'Start Recording');
+            }
         
             else {
                 $('#recordBtn').prop('value', 'Stop Recording');
+                recordingState = 'RECORDING';
+
                 chrome.browserAction.setIcon({ path: './icon-green.png' });
                 chrome.browserAction.setBadgeText({ text: '1' })
                 // Send a message to the active tab
@@ -52,7 +65,7 @@ $(function(){
                 chrome.runtime.onMessage.addListener(handleMessage);
             }
 
-            chrome.storage.sync.set({'recordingState': !recordingState, 'recording': recording});
+            chrome.storage.sync.set({'recordingState': recordingState, 'recording': recording});
         });
     });
 });
