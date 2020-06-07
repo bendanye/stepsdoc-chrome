@@ -14,6 +14,7 @@
   }
       
   function handleKeydown(e) {
+    console.log("handleKeydown-" + e);
     if (e.keyCode !== 9) {
       return
     }
@@ -21,6 +22,7 @@
   }
   
   function handleClick(e) {
+    console.log("handleClick-" + e);
     if (e.target.href) {
       chrome.runtime.sendMessage({
         action: 'url',
