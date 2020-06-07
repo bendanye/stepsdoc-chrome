@@ -2,8 +2,9 @@ var lastUrl;
 
 $(function(){
 
-    chrome.storage.sync.get(['recordingState'],function(recorder){
-        let recordingState = recorder.recordingState;
+    chrome.storage.sync.get(['recordingState', 'recording'],function(recorder){
+        const recordingState = recorder.recordingState;
+        const recording = recorder.recording;
 
         switch (recordingState) {
             case 'RECORDING':
@@ -11,6 +12,8 @@ $(function(){
                 break;
             case 'FINISH':
                 $('#recordBtn').prop('value', 'Clear Recording');
+                let output = generateRecordingOutput(recording);
+                $('#output').val(output);
                 break;
             default:
                 $('#recordBtn').prop('value', 'Start Recording');
@@ -28,13 +31,9 @@ $(function(){
                 $('#recordBtn').prop('value', 'Clear Recording');
                 recordingState = 'FINISH';
 
-                let output = "";
-                
-                for(let i in recording) {
-                    output += recording[i].selector + ":" + recording[i].action + "-" + recording[i].value + "\n";
-                }
-
+                let output = generateRecordingOutput(recording);
                 $('#output').val(output);
+
                 chrome.browserAction.setIcon({ path: './icon-black.png' });
                 chrome.browserAction.setBadgeText({ text: '' })
                 chrome.webNavigation.onCommitted.removeListener()
@@ -69,6 +68,31 @@ $(function(){
         });
     });
 });
+
+function generateRecordingOutput(recording) {
+    let output = "";
+                
+    for(let i in recording) {
+        let action = recording[i].action;
+        let selector = recording[i].selector;
+        let url = recording[i].url;
+        switch (action) {
+            case 'keydown':
+                output += `.type('${selector}', '${value}')`
+                break
+            case 'click':
+                output += `.click('${selector}')`
+                break
+            case 'goto':
+                output += `.goto('${url}')`
+                break
+        }
+        output += "\n";
+    }
+
+    return output;
+
+}
 
 function handleCompletedNavigation (details) {
     console.log("handleCompletedNavigation");
