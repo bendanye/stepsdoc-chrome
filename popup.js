@@ -76,10 +76,11 @@ function generateRecordingOutput(recording) {
         let action = recording[i].action;
         let selector = recording[i].selector;
         let url = recording[i].url;
+        let value = recording[i].value;
         output += 'Step ' + (parseInt(i)+1) + ': '
         switch (action) {
             case 'keydown':
-                output += `type on '${selector}', '${value}'`
+                output += `type '${value}' on '${selector}'`
                 break
             case 'click':
                 output += `click on '${selector}'`
