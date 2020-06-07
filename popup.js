@@ -34,8 +34,8 @@ $(function(){
                 let output = generateRecordingOutput(recording);
                 $('#output').val(output);
 
-                chrome.browserAction.setIcon({ path: './icon-black.png' });
-                chrome.browserAction.setBadgeText({ text: '' })
+                chrome.browserAction.setIcon({ path: './icon-green.png' });
+                //chrome.browserAction.setBadgeText({ text: '' })
                 chrome.webNavigation.onCommitted.removeListener()
                 chrome.runtime.onMessage.removeListener()
                 chrome.tabs.onUpdated.removeListener()
@@ -46,14 +46,14 @@ $(function(){
                 $('#output').val('');
                 recordingState = 'BEGIN';
                 $('#recordBtn').prop('value', 'Start Recording');
+                chrome.browserAction.setIcon({ path: './icon-black.png' });
             }
         
             else {
                 $('#recordBtn').prop('value', 'Stop Recording');
                 recordingState = 'RECORDING';
 
-                chrome.browserAction.setIcon({ path: './icon-green.png' });
-                chrome.browserAction.setBadgeText({ text: '1' })
+                chrome.browserAction.setIcon({ path: './icon-red.png' });
                 // Send a message to the active tab
                 chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
                     var activeTab = tabs[0];
