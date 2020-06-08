@@ -1,4 +1,5 @@
 var lastUrl;
+var savedFileEntry, fileDisplayPath;
 
 $(function(){
 
@@ -34,7 +35,13 @@ $(function(){
                 let output = generateRecordingOutput(recording);
                 $('#output').val(output);
 
+                //doExportToDisk();
+
                 chrome.browserAction.setIcon({ path: './icon-green.png' });
+                chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+                    var activeTab = tabs[0];
+                    chrome.tabs.sendMessage(activeTab.id, {"message": "stop_recording"});
+                });
                 //chrome.browserAction.setBadgeText({ text: '' })
                 chrome.webNavigation.onCommitted.removeListener()
                 chrome.runtime.onMessage.removeListener()
@@ -57,7 +64,7 @@ $(function(){
                 // Send a message to the active tab
                 chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
                     var activeTab = tabs[0];
-                    chrome.tabs.sendMessage(activeTab.id, {"message": "clicked_browser_action"});
+                    chrome.tabs.sendMessage(activeTab.id, {"message": "start_recording"});
                 });
                 chrome.webNavigation.onCompleted.addListener(handleCompletedNavigation);
                 chrome.webNavigation.onCommitted.addListener(handleCommittedNavigation)
@@ -85,15 +92,80 @@ function generateRecordingOutput(recording) {
             case 'click':
                 output += `click on '${selector}'`
                 break
-            case 'goto':
-                output += `.go to '${url}'`
+            case 'url':
+                output += `.go to '${value}'`
+                break
+            default:
+                output += `unkown action ${action}`
                 break
         }
         output += "\n\n";
     }
 
     return output;
+}
 
+function doExportToDisk() {
+    if (savedFileEntry) {
+      exportToFileEntry(savedFileEntry);
+    } else {
+      chrome.fileSystem.chooseEntry( {
+        type: 'saveFile',
+        suggestedName: 'todos.txt',
+        accepts: [ { description: 'txt files (*.txt)',
+                     extensions: ['txt']} ],
+        acceptsAllTypes: true
+      }, exportToFileEntry);
+
+    }
+}
+
+function exportToFileEntry(fileEntry) {
+    savedFileEntry = fileEntry;
+
+    var status = document.getElementById('status');
+
+    // Use this to get a file path appropriate for displaying
+    chrome.fileSystem.getDisplayPath(fileEntry, function(path) {
+      fileDisplayPath = path;
+      status.innerText = 'Exporting to '+path;
+    });
+
+    getTodosAsText(function(contents) {
+
+      fileEntry.createWriter(function(fileWriter) {
+
+        var truncated = false;
+        var blob = new Blob([contents]);
+
+        fileWriter.onwriteend = function(e) {
+          if (!truncated) {
+            truncated = true;
+            // You need to explicitly set the file size to truncate
+            // any content that might have been there before
+            this.truncate(blob.size);
+            return;
+          }
+          status.innerText = 'Export to '+ fileDisplayPath +' completed';
+        };
+
+        fileWriter.onerror = function(e) {
+          status.innerText = 'Export failed: '+e.toString();
+        };
+
+        fileWriter.write(blob);
+
+      });
+    });
+}
+
+function getTodosAsText(callback) {
+    chrome.storage.local.get(['recording', 'captured'], function(recorder) {
+      let output = generateRecordingOutput(recorder.recording);
+
+      callback(output);
+
+    }.bind(this));
 }
 
 function handleCompletedNavigation (details) {
